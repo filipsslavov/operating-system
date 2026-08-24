@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3f2f2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Operating System</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f2f2;
+  --surface:#eae9e9;
+  --ink:#201e1d;
+  --accent:#ec3013;
+  --accent-600:#dd2b0f;
+  --accent-700:#ae1800;
+  --divider:rgba(32,30,29,.4);
+  --divider-soft:rgba(32,30,29,.18);
+  --dim:rgba(32,30,29,.55);
+  --dimmer:rgba(32,30,29,.4);
+  --nav:66px;
+  --font:'Archivo',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--font);
+  font-size:15px;line-height:1.5;
+  padding-bottom:calc(var(--nav) + env(safe-area-inset-bottom));
+  overscroll-behavior-y:none;
+}
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.02em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- shell ---------- */
+.top{
+  position:sticky;top:0;z-index:20;background:var(--bg);
+  border-bottom:2px solid var(--divider);
+  padding:calc(env(safe-area-inset-top) + 16px) 20px 12px;
+}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.top h1{font-size:34px;margin-top:4px;line-height:1}
+.wrap{padding:0 0 30px}
+
+/* ---------- numeral block ---------- */
+.numeral{padding:16px 20px 0;display:flex;align-items:flex-end;gap:14px}
+.numeral .n{font-size:104px;font-weight:900;letter-spacing:-.05em;line-height:.82;color:var(--ink)}
+.numeral .of{padding-bottom:14px}
+.numeral .of .frac{font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--dimmer)}
+.numeral .of .lbl{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--dim);margin-top:6px}
+.dayline{padding:10px 20px 18px;font-size:14px;line-height:1.45;color:var(--dim);max-width:340px}
+
+/* ---------- poster (the one thing) ---------- */
+.poster{background:var(--accent);color:var(--bg);padding:18px 20px}
+.poster .eyebrow{color:var(--bg);opacity:.85}
+.poster .headline{font-size:26px;font-weight:900;letter-spacing:-.02em;line-height:1.08;margin-top:8px}
+.poster .sub{font-size:12.5px;line-height:1.4;margin-top:8px;opacity:.9}
+.poster .meta{font-size:11.5px;font-weight:700;letter-spacing:.1em;margin-top:14px;opacity:.9;display:flex;justify-content:space-between}
+.nextline{display:flex;justify-content:space-between;padding:10px 20px;font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--dim);border-bottom:2px solid var(--divider)}
+
+/* ---------- group label ---------- */
+.grouplbl{display:flex;align-items:center;gap:10px;padding:20px 20px 8px;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.grouplbl::after{content:'';flex:1;height:1px;background:var(--divider-soft)}
+.grouplbl.locked{color:var(--dimmer)}
+.grouplbl.locked::after{background:rgba(32,30,29,.12)}
+
+/* ---------- numbered rows ---------- */
+.row-item{display:flex;align-items:baseline;gap:14px;padding:14px 20px;border-top:1px solid var(--divider-soft);cursor:pointer}
+.row-item .idx{flex:none;width:26px;font-size:13px;font-weight:800;letter-spacing:.04em}
+.row-item .lbl{flex:1;min-width:0}
+.row-item .lbl .t{font-size:19px;font-weight:700;letter-spacing:-.02em;text-decoration-thickness:2px}
+.row-item .lbl .s{font-size:12px;line-height:1.4;color:var(--dim);margin-top:3px}
+.row-item .state{flex:none;font-size:10px;font-weight:700;letter-spacing:.14em;text-align:right}
+.row-item.locked{opacity:.42;cursor:default}
+.row-item.locked .idx{font-style:normal}
+
+/* ---------- stat grid ---------- */
+.statgrid{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:2px solid var(--divider);margin-top:6px}
+.statgrid div.cell{padding:16px 16px 18px;border-right:1px solid var(--divider-soft)}
+.statgrid div.cell:last-child{border-right:none}
+.statgrid .v{font-size:38px;font-weight:900;letter-spacing:-.04em;line-height:1}
+.statgrid .v.accent{color:var(--accent)}
+.statgrid .v small{font-size:16px;font-weight:800}
+.statgrid .l{font-size:9.5px;font-weight:700;letter-spacing:.14em;color:var(--dim);margin-top:5px}
+.footnote{border-top:2px solid var(--divider);padding:16px 20px 6px;font-size:12.5px;line-height:1.5;color:var(--dim)}
+
+/* ---------- accordion (plan) ---------- */
+.acc{border-bottom:2px solid var(--divider)}
+.acc summary{padding:16px 20px;font-size:15px;font-weight:700;letter-spacing:-.01em;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary::after{content:'+';font-size:19px;font-weight:700;color:var(--accent);flex:none}
+.acc[open] summary::after{content:'\2013'}
+.abody{padding:0 20px 18px;font-size:13.5px;color:var(--dim);line-height:1.6}
+.abody strong{color:var(--ink);font-weight:700}
+.abody p{margin:0 0 11px}
+.abody p:last-child{margin-bottom:0}
+.abody ul{margin:0 0 11px;padding-left:18px}
+.abody li{margin-bottom:5px}
+.refrow{display:flex;gap:12px;padding:9px 0;border-top:1px solid var(--divider-soft);font-size:13px}
+.refrow:first-child{border-top:none}
+.refrow .k{font-weight:800;font-size:11px;letter-spacing:.06em;flex:none;width:64px;padding-top:2px;color:var(--accent-700)}
+.refrow .v{color:var(--ink)}
+.refrow .v em{display:block;color:var(--dim);font-style:normal;font-size:12px;margin-top:1px}
+
+/* ---------- log fields ---------- */
+.fieldrow{display:flex;align-items:center;gap:12px;padding:16px 20px;border-top:1px solid var(--divider-soft)}
+.fieldrow:first-child{border-top:none}
+.fieldrow .name{font-size:16px;font-weight:700;flex:1}
+.fieldrow .goal{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--dim)}
+.bump{flex:none;width:36px;height:36px;border:2px solid var(--divider);background:transparent;font-size:20px;font-family:var(--font);font-weight:700;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.bump:active{background:var(--surface)}
+.ctrval{flex:none;font-size:26px;font-weight:900;min-width:48px;text-align:center;letter-spacing:-.02em}
+.ctrval.met{color:var(--accent)}
+.wtrow{display:flex;align-items:center;gap:12px;padding:16px 20px;border-top:2px solid var(--divider)}
+.wtrow label{flex:1;font-size:16px;font-weight:700}
+.wtrow .u{font-size:11px;font-weight:700;color:var(--dim)}
+input[type=number],input[type=date]{
+  width:96px;background:var(--surface);border:1px solid var(--divider);
+  color:var(--ink);font-family:var(--font);font-size:18px;font-weight:800;
+  padding:8px 10px;text-align:right;border-radius:0;
+}
+input:focus-visible{outline:2px solid var(--accent);outline-offset:0}
+.section-note{padding:12px 20px 4px;font-size:12.5px;line-height:1.55;color:var(--dim)}
+textarea{
+  width:100%;background:var(--surface);border:1px solid var(--divider);
+  color:var(--ink);font-family:var(--font);font-size:14px;padding:14px;
+  min-height:96px;resize:vertical;border-radius:0;
+}
+.tawrap{padding:16px 20px}
+
+/* ---------- review ---------- */
+.trend{padding:20px 20px 8px}
+.trend .big{font-size:56px;font-weight:900;letter-spacing:-.04em;line-height:1}
+.trend .big span{font-size:16px;font-weight:600;color:var(--dim)}
+svg.spark{width:100%;height:70px;margin-top:16px;overflow:visible}
+.btn{
+  width:calc(100% - 40px);margin:6px 20px 4px;background:transparent;border:2px solid var(--divider);
+  color:var(--ink);font-family:var(--font);font-weight:700;font-size:13.5px;
+  padding:14px;cursor:pointer;text-align:left;
+}
+.btn:active{background:var(--surface)}
+
+/* ---------- nav ---------- */
+nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  height:calc(var(--nav) + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);
+  background:var(--bg);border-top:2px solid var(--divider);
+  display:grid;grid-template-columns:repeat(4,1fr);
+}
+nav button{
+  background:none;border:none;color:var(--dim);
+  font-family:var(--font);font-size:9.5px;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  border-top:3px solid transparent;margin-top:-2px;padding:0;
+}
+nav button.sel{color:var(--accent);border-top-color:var(--accent)}
+.tab{display:none}
+.tab.sel{display:block;animation:in .18s ease}
+@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="eyebrow" id="datestr">—</div>
+  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+    <h1 id="pagetitle">Today</h1>
+    <div class="eyebrow" id="phasestr" style="text-align:right;white-space:nowrap"></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ================= TODAY ================= -->
+<section class="tab sel" id="t-today">
+  <div id="numeralbox"></div>
+  <div id="posterbox"></div>
+  <div id="nextbox" class="nextline"></div>
+  <div id="checks"></div>
+  <div id="statbox"></div>
+  <div id="footbox"></div>
+</section>
+
+<!-- ================= PLAN ================= -->
+<section class="tab" id="t-plan">
+
+  <details class="acc" open><summary>The ramp — install order</summary><div class="abody">
+    <p>One layer per week. A layer only unlocks when the current one held <strong>5 of 7 days</strong>. Missed weeks repeat; nothing is lost.</p>
+    <div class="refrow"><div class="k">Week 1</div><div class="v">Foundation<em>Fixed wake · phone out of bedroom · 20 min walk</em></div></div>
+    <div class="refrow"><div class="k">Week 2</div><div class="v">Movement<em>Gym 3× · 8,000 steps daily</em></div></div>
+    <div class="refrow"><div class="k">Week 3</div><div class="v">Food<em>The four rules</em></div></div>
+    <div class="refrow"><div class="k">Week 4</div><div class="v">Full system<em>Deep blocks · job search cadence · project</em></div></div>
+    <p style="margin-top:12px">Compressing this is the most likely reason the whole thing fails.</p>
+  </div></details>
+
+  <details class="acc"><summary>Weekday schedule</summary><div class="abody" id="schedref"></div></details>
+
+  <details class="acc"><summary>Food — four rules</summary><div class="abody">
+    <p><strong>1 · Protein anchor.</strong> 40g+ per meal, 150–180g per day. Ordering out means the grilled thing, the bowl, the meat plus a side. This is what makes a deficit survivable.</p>
+    <p><strong>2 · Three zero-effort defaults.</strong> One grocery run a week so "I don't want to decide" has an answer: Greek yogurt + frozen berries · rotisserie chicken + bagged salad · eggs + pre-cooked turkey sausage.</p>
+    <p><strong>3 · No liquid calories Mon–Fri.</strong> Coffee black or a splash. Easy win, several hundred calories.</p>
+    <p><strong>4 · Relocate the snacking.</strong> Nothing eaten standing in the kitchen — it goes on a plate and you sit. And anything you can't stop eating once opened doesn't live in the house. Inventory, not willpower.</p>
+    <p><strong>Weekend drinking:</strong> two nights, not four. Mezcal + soda + lime is ~100 cal against ~280 for the margarita. Eat protein before, not after.</p>
+    <p><strong>Target:</strong> bodyweight × 10 calories. Recalculate every 15 lbs. Track three weeks to calibrate your eye, then run on the rules.</p>
+  </div></details>
+
+  <details class="acc"><summary>Gym — A/B</summary><div class="abody">
+    <p>3× a week, 45 minutes, 3 sets of 8–12. Hit 12 on all three sets, add weight next time. That progression is the entire program.</p>
+    <p><strong>Workout A</strong></p>
+    <ul><li>Goblet squat</li><li>Dumbbell bench press</li><li>Seated cable row</li><li>Plank — 3 × 30–45 sec</li></ul>
+    <p><strong>Workout B</strong></p>
+    <ul><li>Romanian deadlift</li><li>Lat pulldown</li><li>Dumbbell shoulder press</li><li>Bulgarian split squat</li></ul>
+    <p>Don't add exercises until month three. Variety is how gym programs die.</p>
+  </div></details>
+
+  <details class="acc"><summary>Job search — weekly cadence</summary><div class="abody">
+    <p>Six tailored applications beat forty sprayed.</p>
+    <div class="refrow"><div class="k">Mon</div><div class="v">Source 10 target roles</div></div>
+    <div class="refrow"><div class="k">Tue</div><div class="v">3 tailored applications</div></div>
+    <div class="refrow"><div class="k">Wed</div><div class="v">5 outreach messages<em>People at target companies, not recruiters</em></div></div>
+    <div class="refrow"><div class="k">Thu</div><div class="v">3 tailored applications</div></div>
+    <div class="refrow"><div class="k">Fri</div><div class="v">Follow-ups + what's actually getting replies</div></div>
+    <p style="margin-top:12px">Wednesday is the one people skip and the one that works. Twenty warm messages a month; you need one to land.</p>
+  </div></details>
+
+  <details class="acc"><summary>Project — 12 weeks, ships regardless</summary><div class="abody">
+    <div class="refrow"><div class="k">Wk 1–2</div><div class="v">Scope locked in writing · data sourced</div></div>
+    <div class="refrow"><div class="k">Wk 3–6</div><div class="v">Pipeline end to end — ugly but working</div></div>
+    <div class="refrow"><div class="k">Wk 7–9</div><div class="v">Analysis or model layer</div></div>
+    <div class="refrow"><div class="k">Wk 10–11</div><div class="v">Dashboard + written narrative</div></div>
+    <div class="refrow"><div class="k">Wk 12</div><div class="v">Publish. Whatever state it's in.</div></div>
+    <p style="margin-top:12px"><strong>The four rules that make it stick:</strong></p>
+    <ul>
+      <li>One project at a time, with a ship date.</li>
+      <li>Every new idea goes to the parking lot. It does not get started. Look at the list on week 12 and not before.</li>
+      <li>Ship ugly. One finished thing beats four abandoned perfect ones — and it's the finished one you talk about in interviews.</li>
+      <li>Friday demo. Show someone what moved. External witness converts intention into completion.</li>
+    </ul>
+    <p>The switching isn't a character flaw. It's what happens when a project has no deadline, no audience, and no cost to walking away.</p>
+  </div></details>
+
+  <details class="acc"><summary>Phone</summary><div class="abody">
+    <ul>
+      <li>Charger lives in the kitchen. Buy a cheap alarm clock.</li>
+      <li>Social and news off the home screen — one folder, second page.</li>
+      <li>Different room during deep blocks. Not face-down on the desk.</li>
+      <li>One scheduled 45-minute scroll window in the evening. Bans fail; appointments hold.</li>
+    </ul>
+  </div></details>
+
+  <details class="acc"><summary>What on-track looks like</summary><div class="abody">
+    <div class="refrow"><div class="k">Month 1</div><div class="v">Wake time automatic · gym is habit · down 4–6 lbs · project scoped</div></div>
+    <div class="refrow"><div class="k">Month 3</div><div class="v">Down 15–18 lbs · pipeline works · real conversations in the search</div></div>
+    <div class="refrow"><div class="k">Month 6</div><div class="v">Down 28–32 lbs · project published and leading your interviews</div></div>
+    <div class="refrow"><div class="k">Month 10–12</div><div class="v">50 lbs down · employed · proof you can finish something</div></div>
+  </div></details>
+
+</section>
+
+<!-- ================= LOG ================= -->
+<section class="tab" id="t-log">
+  <div class="grouplbl">Today's numbers</div>
+  <div id="lognums"></div>
+  <div class="grouplbl">Weight</div>
+  <div class="wtrow">
+    <label for="wt">Weigh-in</label>
+    <span class="u">LBS</span>
+    <input type="number" id="wt" step="0.1" inputmode="decimal" placeholder="—">
+  </div>
+  <div class="section-note">Once a week, same day, same conditions. Daily weight is noise and it will mess with your head.</div>
+  <div class="grouplbl">Parking lot</div>
+  <div class="tawrap"><textarea id="parking" placeholder="New idea that grabbed you? Write it here. Do not start it."></textarea></div>
+  <div class="section-note">Every shiny thing goes here instead of becoming a project. You may open this list on week 12.</div>
+</section>
+
+<!-- ================= REVIEW ================= -->
+<section class="tab" id="t-review">
+  <div class="trend" id="trend"></div>
+  <div class="grouplbl">This week</div>
+  <div id="weekstats"></div>
+  <div class="grouplbl">Sunday, 30 minutes</div>
+  <div class="tawrap"><textarea id="review" placeholder="What worked. What didn't. The ONE thing that changes next week."></textarea></div>
+  <div class="section-note">One thing. Not five. A bad week is data for this page, not grounds for quitting.</div>
+  <button class="btn" id="resetbtn">Reset start date</button>
+</section>
+
+</div>
+
+<nav>
+  <button data-tab="today" class="sel">Today</button>
+  <button data-tab="plan">Plan</button>
+  <button data-tab="log">Log</button>
+  <button data-tab="review">Review</button>
+</nav>
+
+<script>
+/* ---------------- storage ---------------- */
+const KEY='fs-operating-system-numeral-v1';
+async function load(){
+  if(window.storage){
+    try{const r=await window.storage.get(KEY);if(r&&r.value)return JSON.parse(r.value)}catch(e){}
+  }
+  try{const s=localStorage.getItem(KEY);if(s)return JSON.parse(s)}catch(e){}
+  return null;
+}
+async function save(){
+  const s=JSON.stringify(S);
+  try{localStorage.setItem(KEY,s)}catch(e){}
+  if(window.storage){try{await window.storage.set(KEY,s)}catch(e){}}
+}
+
+/* ---------------- model ---------------- */
+const LAYERS=[
+  {n:'Foundation',sub:'Fixed wake time. Phone charges outside the bedroom. Twenty minutes of walking. That is the whole assignment.'},
+  {n:'Movement',sub:'Foundation holds, plus the gym three times and 8,000 steps a day. Food is still untouched.'},
+  {n:'Food',sub:'Everything above, plus the four rules. This is the heaviest lift — that is why it is third and not first.'},
+  {n:'Full system',sub:'Deep blocks, the job search cadence, and the project. You are running the whole thing now.'}
+];
+
+const ITEMS=[
+  {id:'wake', p:0, t:'Up at 6:45',            s:'Weekends within an hour of it. This is what protects Monday.'},
+  {id:'phone',p:0, t:'Phone charged in the kitchen', s:'Not the nightstand. Not face-down.'},
+  {id:'walk', p:0, t:'20-minute walk',        s:'Outside. Any time of day.'},
+  {id:'steps',p:1, t:'8,000 steps',           s:'The real weight-loss lever for a sedentary day.'},
+  {id:'gym',  p:1, t:'Gym — A or B',          s:'Mon / Wed / Fri. Three sets, 8–12 reps.', wk:[1,3,5]},
+  {id:'prot', p:2, t:'Protein at every meal', s:'40g+ each. Order the grilled thing.'},
+  {id:'liq',  p:2, t:'No liquid calories',    s:'Weekdays only. Weekends are budgeted, not banned.'},
+  {id:'sit',  p:2, t:'Nothing eaten standing up', s:'On a plate, sitting down, or not at all.'},
+  {id:'d1',   p:3, t:'Deep Block 1 — project',s:'08:00–10:00. Phone in another room.'},
+  {id:'job',  p:3, t:'Job search block',      s:'10:30–12:00. Follow the weekly cadence.'},
+  {id:'d2',   p:3, t:'Deep Block 2 — flex',   s:'14:30–16:00. Interview prep, drills, follow-ups.'}
+];
+
+const COUNTERS=[
+  {id:'apps',n:'Applications sent',g:'Tue & Thu — 3 each',goal:3,p:3},
+  {id:'out', n:'Outreach messages',g:'Wed — 5',goal:5,p:3},
+  {id:'proj',n:'Project hours',g:'10 per week',goal:2,p:3}
+];
+
+const SCHED=[
+  [405,435,'No phone','Water, coffee, step outside'],
+  [435,480,'Breakfast','Set the ONE priority for the day'],
+  [480,600,'Deep Block 1','Project work — hardest thinking, sharpest hours'],
+  [600,630,'Walk','Outside. Counts toward steps'],
+  [630,720,'Job search','Applications, tailoring, outreach'],
+  [720,780,'Lunch','And actually decompress'],
+  [780,870,'Gym or walk','A/B on Mon, Wed, Fri'],
+  [870,960,'Deep Block 2','Interview prep, drills, follow-ups'],
+  [960,1290,'Free','Genuinely free. No guilt. This is the trade.'],
+  [1290,1350,'Phone to the kitchen','Hard stop'],
+  [1350,1440,'Wind down','Bed by 11']
+];
+
+let S=null, TAB='today';
+const iso=d=>d.toISOString().slice(0,10);
+const today=()=>iso(new Date());
+function day(k){ k=k||today(); if(!S.d[k])S.d[k]={c:{},n:{}}; return S.d[k]; }
+
+function weekNo(){
+  const a=new Date(S.start+'T00:00:00'), b=new Date(today()+'T00:00:00');
+  return Math.floor((b-a)/86400000/7);
+}
+function weekDates(){
+  const a=new Date(S.start+'T00:00:00');
+  a.setDate(a.getDate()+weekNo()*7);
+  return Array.from({length:7},(_,i)=>{const d=new Date(a);d.setDate(d.getDate()+i);return iso(d)});
+}
+function coreFor(p){ return ITEMS.filter(i=>i.p<=p); }
+function held(k){
+  const p=S.phase, req=coreFor(p).filter(i=>!i.wk||i.wk.includes(new Date(k+'T00:00:00').getDay()));
+  const c=(S.d[k]||{c:{}}).c;
+  return req.length>0 && req.every(i=>c[i.id]);
+}
+function maybeAdvance(){
+  if(S.phase>=3) return;
+  if(weekNo()<=S.phaseWeek) return;
+  const a=new Date(S.start+'T00:00:00'); a.setDate(a.getDate()+S.phaseWeek*7);
+  const dates=Array.from({length:7},(_,i)=>{const d=new Date(a);d.setDate(d.getDate()+i);return iso(d)});
+  const n=dates.filter(held).length;
+  S.phaseWeek=weekNo();
+  if(n>=5) S.phase++;
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  const now=new Date();
+  document.getElementById('datestr').textContent=
+    now.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}).toUpperCase();
+  document.getElementById('pagetitle').textContent=
+    {today:'Today',plan:'The plan',log:'Log',review:'Review'}[TAB];
+  document.getElementById('phasestr').textContent=`WEEK ${weekNo()+1} / LAYER ${S.phase+1}`;
+  renderToday(now); renderChecks(); renderLog(); renderReview(); renderSched();
+}
+
+function fmtT(v){ return String(Math.floor(v/60)).padStart(2,'0')+':'+String(v%60).padStart(2,'0'); }
+
+function renderToday(now){
+  const items=coreFor(S.phase).filter(i=>!i.wk||i.wk.includes(now.getDay()));
+  const d=day(), n=items.filter(i=>d.c[i.id]).length, total=items.length;
+  document.getElementById('numeralbox').innerHTML=`
+    <div class="numeral"><div class="n">${n}</div><div class="of">
+      <div class="frac">/${total}</div><div class="lbl">DONE TODAY</div></div></div>
+    <div class="dayline">${
+      n>=total && total>0 ? 'Full day held. That is what this week is supposed to look like.'
+      : n>=Math.ceil(total*0.6) ? 'Most of the day is already behind you. A few left and it counts as held.'
+      : n>=1 ? 'Started. The rest of the list is small on purpose.'
+      : 'Nothing yet — that is fine this early. Start with the smallest one.'
+    }</div>`;
+
+  const m=now.getHours()*60+now.getMinutes();
+  const wknd=[0,6].includes(now.getDay());
+  const box=document.getElementById('posterbox'), nx=document.getElementById('nextbox');
+  if(wknd){
+    box.innerHTML=`<div class="poster"><div class="eyebrow">Right now</div>
+      <div class="headline">Weekend</div>
+      <div class="sub">Wake within an hour of 6:45, one long walk, and otherwise off. Sunday at 4 is the review.</div></div>`;
+    nx.innerHTML=''; return;
+  }
+  let i=SCHED.findIndex(b=>m>=b[0]&&m<b[1]);
+  if(i<0){
+    box.innerHTML=`<div class="poster"><div class="eyebrow">Right now</div>
+      <div class="headline">Asleep, ideally</div>
+      <div class="sub">The day starts at 6:45.</div></div>`;
+    nx.innerHTML=`<span>NEXT · 06:45</span><span>NO PHONE</span>`; return;
+  }
+  const b=SCHED[i];
+  box.innerHTML=`<div class="poster"><div class="eyebrow">Right now · ${fmtT(b[0])}–${fmtT(b[1])}</div>
+    <div class="headline">${b[2]}</div><div class="sub">${b[3]}</div>
+    <div class="meta"><span>${b[1]-m} MIN LEFT</span><span></span></div></div>`;
+  const n2=SCHED[i+1];
+  nx.innerHTML = n2 ? `<span>NEXT · ${fmtT(n2[0])}</span><span>${n2[2].toUpperCase()}</span>` : '';
+
+  const dates=weekDates(), t0=today();
+  const heldCount=dates.filter(k=>k<=t0&&held(k)).length;
+  const stepk=d.n.stepk||0;
+  const ws=Object.entries(S.d).filter(([,v])=>v.w).sort();
+  const downSoFar = ws.length ? (ws[0][1].w - ws[ws.length-1][1].w).toFixed(1) : '0';
+  document.getElementById('statbox').innerHTML=`<div class="statgrid">
+    <div class="cell"><div class="v">${heldCount}</div><div class="l">DAYS HELD</div></div>
+    <div class="cell"><div class="v accent">${stepk}<small>k</small></div><div class="l">STEPS</div></div>
+    <div class="cell"><div class="v">${downSoFar<0?'+':'−'}${Math.abs(downSoFar)}<small>lb</small></div><div class="l">SO FAR</div></div>
+  </div>`;
+
+  const needed=5-heldCount;
+  document.getElementById('footbox').innerHTML = S.phase>=3
+    ? `<div class="footnote">All layers installed. The only job now is holding the line.</div>`
+    : needed>0
+      ? `<div class="footnote">${needed} more held day${needed===1?'':'s'} this week and ${LAYERS[S.phase+1].n} opens. No rush — the week isn't over.</div>`
+      : `<div class="footnote">Five days held. ${LAYERS[S.phase+1].n} opens next week.</div>`;
+}
+
+function renderChecks(){
+  const d=day(), dow=new Date().getDay(), out=[]; let idx=0, last=-1;
+  ITEMS.forEach(i=>{
+    if(i.p>S.phase) return;
+    if(i.wk&&!i.wk.includes(dow)) return;
+    if(i.p!==last){ out.push(`<div class="grouplbl">${LAYERS[i.p].n}</div>`); last=i.p; }
+    idx++;
+    const on=!!d.c[i.id];
+    out.push(`<div class="row-item" data-ck="${i.id}">
+      <div class="idx" style="color:${on?'var(--accent)':'var(--dimmer)'}">${String(idx).padStart(2,'0')}</div>
+      <div class="lbl"><div class="t" style="color:${on?'var(--dim)':'var(--ink)'};text-decoration:${on?'line-through var(--accent)':'none'}">${i.t}</div>
+      <div class="s">${i.s}</div></div>
+      <div class="state" style="color:${on?'var(--accent)':'var(--dimmer)'}">${on?'DONE':''}</div></div>`);
+  });
+  if(S.phase<3){
+    const nx=LAYERS[S.phase+1];
+    out.push(`<div class="grouplbl locked">${nx.n} — locked</div>`);
+    ITEMS.filter(i=>i.p===S.phase+1).forEach(i=>{
+      idx++;
+      out.push(`<div class="row-item locked">
+        <div class="idx">${String(idx).padStart(2,'0')}</div>
+        <div class="lbl"><div class="t">${i.t}</div></div>
+        <div class="state">LOCKED</div></div>`);
+    });
+  }
+  document.getElementById('checks').innerHTML=out.join('');
+}
+
+function ctrRow(c,d){
+  const v=d.n[c.id]||0;
+  return `<div class="fieldrow">
+    <button class="bump" data-dec="${c.id}">−</button>
+    <div class="ctrval ${v>=c.goal?'met':''}">${v}</div>
+    <div class="name">${c.n}<div class="goal">${c.g}</div></div>
+    <button class="bump" data-inc="${c.id}">+</button></div>`;
+}
+function renderLog(){
+  const d=day();
+  const rows = S.phase>=3 ? COUNTERS.map(c=>ctrRow(c,d)).join('') : `<div class="section-note">Counters arrive with Layer 4. Right now the only job is holding the layers you have.</div>`;
+  document.getElementById('lognums').innerHTML= rows +
+    `<div class="fieldrow"><button class="bump" data-dec="stepk">−</button>
+      <div class="ctrval ${(d.n.stepk||0)>=8?'met':''}">${d.n.stepk||0}k</div>
+      <div class="name">Steps<div class="goal">8,000 daily floor</div></div>
+      <button class="bump" data-inc="stepk">+</button></div>`;
+  document.getElementById('wt').value=d.w||'';
+  document.getElementById('parking').value=S.parking||'';
+}
+
+function renderReview(){
+  const ws=Object.entries(S.d).filter(([,v])=>v.w).sort();
+  const t=document.getElementById('trend');
+  if(!ws.length){
+    t.innerHTML=`<div class="eyebrow">Weight</div><div class="big" style="margin-top:8px">—</div>
+      <div class="section-note" style="padding:10px 0 0">Log your first weigh-in on the Log tab and the trend starts here.</div>`;
+  }else{
+    const vals=ws.map(([,v])=>+v.w), first=vals[0], cur=vals[vals.length-1];
+    const dl=(first-cur).toFixed(1), rem=(cur-(first-50)).toFixed(0);
+    let spark='';
+    if(vals.length>1){
+      const mn=Math.min(...vals),mx=Math.max(...vals),r=(mx-mn)||1;
+      const pts=vals.map((v,i)=>`${(i/(vals.length-1))*100},${58-((v-mn)/r)*52}`).join(' ');
+      spark=`<svg class="spark" viewBox="0 0 100 60" preserveAspectRatio="none">
+        <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2"
+        vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+    }
+    t.innerHTML=`<div class="eyebrow">Down so far</div>
+      <div class="big" style="margin-top:8px">${dl} <span>lbs</span></div>
+      <div class="section-note" style="padding:8px 0 0">Now ${cur} lbs · ${rem} to go · ${ws.length} weigh-in${ws.length>1?'s':''} logged</div>${spark}`;
+  }
+  const dates=weekDates(), t0=today();
+  const sum=k=>dates.reduce((a,dd)=>a+(((S.d[dd]||{n:{}}).n[k])||0),0);
+  const gyms=dates.filter(dd=>(S.d[dd]||{c:{}}).c.gym).length;
+  const stats=[
+    ['Days held',`${dates.filter(dd=>dd<=t0&&held(dd)).length} of 7`],
+    ['Gym sessions',`${gyms} of 3`],
+    ['Applications',`${sum('apps')} of 6`],
+    ['Outreach',`${sum('out')} of 5`],
+    ['Project hours',`${sum('proj')} of 10`]
+  ];
+  document.getElementById('weekstats').innerHTML=stats.map(([k,v])=>
+    `<div class="fieldrow"><div class="name">${k}</div>
+     <div class="ctrval" style="font-size:16px;min-width:auto">${v}</div></div>`).join('');
+  document.getElementById('review').value=S.review||'';
+}
+
+function renderSched(){
+  document.getElementById('schedref').innerHTML=
+    SCHED.map(b=>`<div class="refrow"><div class="k">${fmtT(b[0])}</div>
+      <div class="v">${b[2]}<em>${b[3]}</em></div></div>`).join('') +
+    `<p style="margin-top:12px">Roughly 5.5 focused hours — a full day's output, because there are no meetings.</p>`;
+}
+
+/* ---------------- events ---------------- */
+document.addEventListener('click',async e=>{
+  const nav=e.target.closest('nav button');
+  if(nav){
+    TAB=nav.dataset.tab;
+    document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('sel',b===nav));
+    document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('sel',s.id==='t-'+TAB));
+    scrollTo(0,0); render(); return;
+  }
+  const ck=e.target.closest('[data-ck]');
+  if(ck){ const d=day(),k=ck.dataset.ck; d.c[k]=!d.c[k]; await save(); render(); return; }
+  const inc=e.target.closest('[data-inc]'), dec=e.target.closest('[data-dec]');
+  if(inc||dec){
+    const k=(inc||dec).dataset[inc?'inc':'dec'], d=day();
+    d.n[k]=Math.max(0,(d.n[k]||0)+(inc?1:-1));
+    await save(); render(); return;
+  }
+  if(e.target.id==='resetbtn'){
+    if(confirm('Restart the ramp from today? Your weight history and notes stay.')){
+      S.start=today(); S.phase=0; S.phaseWeek=0; await save(); render();
+    }
+  }
+});
+document.getElementById('wt').addEventListener('change',async e=>{
+  const d=day(); d.w=e.target.value?+e.target.value:null; await save(); renderReview(); renderToday(new Date());
+});
+['parking','review'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',async e=>{ S[id]=e.target.value; await save(); });
+});
+
+/* ---------------- boot ---------------- */
+(async()=>{
+  S=await load()||{start:today(),phase:0,phaseWeek:0,d:{},parking:'',review:''};
+  maybeAdvance(); await save(); render();
+  setInterval(()=>{ if(TAB==='today') renderToday(new Date()); },60000);
+})();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+</script>
+</body>
+</html>
