@@ -1,4 +1,4 @@
-const CACHE = 'os-shell-v2';
+const CACHE = 'os-shell-v3';
 const SHELL = ['./', './index.html', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png', './icon-512-maskable.png'];
 
 self.addEventListener('install', e => {
